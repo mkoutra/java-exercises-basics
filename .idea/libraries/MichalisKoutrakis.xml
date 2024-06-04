@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="MichalisKoutrakis">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/src/gr/aueb/cf/ch4/MichalisKoutrakis.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

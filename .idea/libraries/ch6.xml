@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="ch6">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/src/gr/aueb/cf/ch6/MichalisKoutrakis6B.zip!/" />
+      <root url="jar://$PROJECT_DIR$/src/gr/aueb/cf/ch6/MichalisKoutrakisExercise6.zip!/" />
+      <root url="jar://$PROJECT_DIR$/src/gr/aueb/cf/ch6/MichalisKoutrakis6C.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

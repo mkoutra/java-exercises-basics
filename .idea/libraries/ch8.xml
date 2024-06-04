@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="ch8">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/out/production/JavaExercisesBasics/gr/aueb/cf/ch8/MichalisKoutrakisExceptions.zip!/" />
+      <root url="jar://$PROJECT_DIR$/out/production/JavaExercisesBasics/gr/aueb/cf/ch8/MichalisKoutrakisIO.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
