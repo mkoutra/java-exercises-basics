@@ -1,72 +1,124 @@
 package gr.aueb.cf.fiveProjects.ticTacToe;
 
-import org.w3c.dom.css.CSSStyleDeclaration;
+import gr.aueb.cf.fiveProjects.ticTacToe.exceptions.InvalidPositionException;
+import gr.aueb.cf.fiveProjects.ticTacToe.exceptions.OccupiedPositionException;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class TicTacToe {
     final static Scanner in = new Scanner(System.in);
-    final static String table[][] = {{"", "", ""},
-                                     {"", "", ""},
-                                     {"", "", ""}};
-
 
     public static void main(String[] args) {
-        int activePlayer = (int) Math.floor(Math.random() * 2);
+        playTicTacToe();
+    }
+
+    /**
+     * Play the game.
+     */
+    public static void playTicTacToe() {
+        int currentPlayer = (int) Math.floor(Math.random() * 2);
+        final TicTacToeTable table = new TicTacToeTable(new String[] {"X", "O"});
         String position;
-        String[] symbols = {"X", "O"};
 
-        printInstructions(symbols);
-        printTable();
+        printInstructions(table.getSymbols());
+        table.printTable();
 
-        while (true) {
-            System.out.println("Player " + (activePlayer + 1) + " is your turn.");
-            System.out.print("Insert table position: ");
-            position = getInput();
+        while (!table.checkFinalResult()) {
+            System.out.println("Player " + (currentPlayer + 1) +
+                    " (" + table.getSymbols()[currentPlayer] + "), it's your turn!");
+            System.out.print("Enter your move: ");
 
-            if (position.matches("^[qQ]$")) {
-                System.out.println("Goodbye!");
-                break;
-            }
-
-            if (!validatePosition(position)) {
+            try {
+                position = getPosition();
+                if (position.matches("^[qQ]$")) {
+                    System.out.println("Goodbye!");
+                    break;
+                }
+                insertToTable(table, table.getSymbols()[currentPlayer], position);
+                table.printTable();
+                currentPlayer = getNextPlayer(currentPlayer);
+            } catch (InvalidPositionException | OccupiedPositionException e) {
+                System.err.println(e.getMessage());
                 System.out.println("Please insert valid input.");
-                continue;
             }
+        }
+        handleFinalResult(table);
+    }
 
-            if (insertToTable(symbols[activePlayer], position) == -1) {
-                System.out.println("Please insert an empty position.");
-                continue;
-            }
-            printTable();
-            if (!checkWin(symbols).isEmpty()) {
-                System.out.println(checkWin(symbols));
+    /**
+     * Show the appropriate message depending on the result.
+     *
+     * @param table Tic-tac-toe table
+     */
+    public static void handleFinalResult(TicTacToeTable table) {
+        String winningSymbol = table.getWinningSymbol();
+        int winner = -1;
+
+        if (winningSymbol.equals("TIE")) {
+            System.out.println("We have a tie!");
+        } else {
+            winner = getPlayerFromSymbol(winningSymbol, table.getSymbols());
+            System.out.println("Player " + (winner + 1) + " wins!");
+        }
+    }
+
+    /**
+     * Map symbol to player index.
+     *
+     * @param symbol    The symbol to map.
+     * @param symbols   All the available symbols.
+     * @return          The index of the player holding the symbol
+     */
+    public static int getPlayerFromSymbol(String symbol, String[] symbols) {
+        int player = -1;
+
+        for (int i = 0; i < symbols.length; ++i) {
+            if (symbols[i].equals(symbol)) {
+                player = i;
                 break;
             }
-            activePlayer = ++activePlayer % 2;
         }
 
+        return player;
     }
 
-    public static int insertToTable(String symbol, String position) {
+    /**
+     * Returns the player that plays next.
+     *
+     * @param currentPlayer The index of the current player.
+     * @return      The index of the next player (0 or 1)
+     */
+    public static int getNextPlayer(int currentPlayer) {
+        return currentPlayer == 0 ? 1 : 0;
+    }
+
+    /**
+     * Insert to table as long as the position is not occupied.
+     *
+     * @param table     Tic-tac-toe table.
+     * @param symbol    The symbol to insert
+     * @param position  The position as given by the user.
+     * @throws OccupiedPositionException If the position is occupied.
+     */
+    public static void insertToTable(TicTacToeTable table, String symbol, String position)
+            throws OccupiedPositionException{
         int[] coordinates = mapCoordinates(position);
-        if (!isPositionEmpty(coordinates)) {
-            return -1;
+
+        if (!table.isPositionEmpty(coordinates)) {
+            throw new OccupiedPositionException(position);
         }
-        tableInsert(symbol, coordinates);
-        return 0;
+
+        table.insert(symbol, coordinates);
     }
 
-    public static void tableInsert(String symbol, int[] coordinates) {
-        table[coordinates[0]][coordinates[1]] = symbol;
-    }
-
-    public static boolean isPositionEmpty(int[] coordinates) {
-        return table[coordinates[0]][coordinates[1]].isEmpty();
-    }
-
+    /**
+     * Transforms a position given by the user
+     * to array coordinates (e.g. c2 --> {2, 1}).
+     *
+     * @param position  The position, as given by the user
+     * @return  An array with two integers representing the array coordinates.
+     */
     public static int[] mapCoordinates(String position) {
         Map<Character, Integer> map = Map.of(
                 'a', 0,
@@ -101,126 +153,31 @@ public class TicTacToe {
         System.out.println("Insert [q] or [Q] to exit.");
     }
 
-    public static String getInput() {
+    /**
+     * Reads input from user and trims it.
+     * @return users input
+     */
+    public static String getPositionFromUser() {
         return in.nextLine().trim();
     }
 
-    public static boolean validatePosition(String s) {
-        return s.matches("^[a-cA-C][1-3]$");
-    }
-
-    public static void printTable() {
-        char[] rowNames = {'a', 'b', 'c'};
-        System.out.println("   1     2     3");
-
-        for (int i = 0; i < table.length; i++) {
-            System.out.println("      |     |     ");
-            System.out.print(rowNames[i]);
-
-            for (int j = 0; j < table[i].length; j++) {
-                if (table[i][j].isEmpty())  System.out.print("     ");
-                else System.out.printf("  %s  ", table[i][j]);
-
-                if (j < 2) System.out.print("|");
-            }
-
-            if (i < 2) System.out.println("\n  ____|_____|_____");
-            else System.out.println("\n      |     |     ");
-        }
-    }
-
     /**
-     * Checks if there is a winner, and returns the symbol of the winner.
-     * If there is no winner, it returns the empty string "".
+     * Reads the position from user and checks if it is valid.
      *
-     * @param symbols
-     *      The symbols for each player
      * @return
-     *      The symbol string of the winner, otherwise
-     *      it returns the empty string "".
+     *      the position given by the user
+     * @throws InvalidPositionException
+     *      If the position does not correspond to any table positions.
      */
-    public static String checkWin(final String[] symbols) {
-        String winningSymbol = "";
-
-        if (checkTie()) return "Tie!";
-
-        for (String s : symbols) {
-            if (checkDiagonal(s) || checkVerticalWin(s) || checkHorizontalWin(s)) {
-                winningSymbol = s;
-            }
+    public static String getPosition() throws InvalidPositionException {
+        String position = getPositionFromUser();
+        if (!isValidPosition(position)) {
+            throw new InvalidPositionException(position);
         }
-
-        return winningSymbol;
+        return position;
     }
 
-    public static boolean checkTie() {
-        for (String[] row : table) {
-            for (String s : row) {
-                if (s.isEmpty()) return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean checkVerticalWin(final String s) {
-        boolean winnerExists = false;
-        for (int col = 0; col < table.length; col++) {
-            if (checkSingleCol(col, s)) {
-                winnerExists = true;
-                break;
-            }
-        }
-        return winnerExists;
-    }
-
-    private static boolean checkSingleCol(final int col, final String s) {
-        for (int row = 0; row < table.length; row++) {
-            if (!table[row][col].equals(s)) return false;
-        }
-        return true;
-    }
-
-    private static boolean checkHorizontalWin(final String s) {
-        boolean winnerExists = false;
-        for (int row = 0; row < table.length; row++) {
-            if (checkSingleRow(row, s)) {
-                winnerExists = true;
-                break;
-            }
-        }
-        return winnerExists;
-    }
-
-    private static boolean checkSingleRow(final int row, final String s) {
-        for (int col = 0; col < table.length; col++) {
-            if (!table[row][col].equals(s)) return false;
-        }
-        return true;
-    }
-
-    private static boolean checkDiagonal(final String s) {
-        boolean diagonalWins = true;
-
-        // 1st diagonal
-        for (int i = 0; i < table.length; i++) {
-            if (!table[i][i].equals(s)) {
-                diagonalWins = false;
-                break;
-            }
-        }
-
-        // 2nd diagonal
-        if (!diagonalWins) {
-            diagonalWins = true;
-
-            for(int i = table.length - 1; i >= 0; i--) {
-                if (!table[table.length - 1 - i][i].equals(s)) {
-                    diagonalWins = false;
-                    break;
-                }
-            }
-        }
-
-        return diagonalWins;
+    public static boolean isValidPosition(String s) {
+        return s.matches("^[qQ]|[a-cA-C][1-3]$");
     }
 }
