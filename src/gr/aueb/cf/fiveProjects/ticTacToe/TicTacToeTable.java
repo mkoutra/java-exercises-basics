@@ -1,5 +1,10 @@
 package gr.aueb.cf.fiveProjects.ticTacToe;
 
+/**
+ * Table implementation for {@link TicTacToe}.
+ *
+ * @author Michalis Koutrakis
+ */
 public class TicTacToeTable {
     final String[][] table = {{"", "", ""},
                               {"", "", ""},

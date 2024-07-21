@@ -6,6 +6,11 @@ import gr.aueb.cf.fiveProjects.ticTacToe.exceptions.OccupiedPositionException;
 import java.util.Map;
 import java.util.Scanner;
 
+/**
+ * Two player implementation of Tic-Tac-Toe.
+ *
+ * @author Michalis Koutrakis
+ */
 public class TicTacToe {
     final static Scanner in = new Scanner(System.in);
 
